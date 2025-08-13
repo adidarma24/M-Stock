@@ -11,27 +11,47 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Contoh data statis, bisa diganti dari DB
-        // Ambil tanggal 7 hari terakhir
-        $dates = collect(range(0, 6))->map(function ($i) {
-            return Carbon::now()->subDays(6 - $i)->startOfDay();
+        // Ambil data 6 bulan terakhir
+        $months = collect(range(0, 5))->map(function ($i) {
+            return Carbon::now()->subMonths(5 - $i)->startOfMonth();
         });
-        // Label hari dalam bahasa Indonesia
-        $labels = $dates->map(function ($date) {
-            $days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-            return $days[$date->dayOfWeek];
+
+        // Label bulan dalam bahasa Indonesia
+        $labels = $months->map(function ($date) {
+            $bulan = [
+                'Jan',
+                'Feb',
+                'Mar',
+                'Apr',
+                'Mei',
+                'Jun',
+                'Jul',
+                'Agu',
+                'Sep',
+                'Okt',
+                'Nov',
+                'Des'
+            ];
+            return $bulan[$date->month - 1] . ' ' . $date->year;
         })->toArray();
 
-        // Ambil data StockIn per hari
-        $stockIn = $dates->map(function ($date) {
-            return StockIn::whereDate('created_at', $date)->sum('quantity');
+        // Ambil data StockIn per bulan
+        $stockIn = $months->map(function ($date) {
+            $start = $date->copy()->startOfMonth();
+            $end = $date->copy()->endOfMonth();
+            return StockIn::whereBetween('created_at', [$start, $end])->sum('quantity');
         })->toArray();
 
-        // Ambil data StockOut per hari
-        $stockOut = $dates->map(function ($date) {
-            return StockOut::whereDate('created_at', $date)->sum('quantity');
+        // Ambil data StockOut per bulan
+        $stockOut = $months->map(function ($date) {
+            $start = $date->copy()->startOfMonth();
+            $end = $date->copy()->endOfMonth();
+            return StockOut::whereBetween('created_at', [$start, $end])->sum('quantity');
         })->toArray();
 
-        return view('dashboard.index', compact('stockIn', 'stockOut', 'labels'));
+        // Ambil 5 stok masuk terakhir
+        $latestStockIn = StockIn::with('product')->orderByDesc('created_at')->limit(5)->get();
+
+        return view('dashboard.index', compact('stockIn', 'stockOut', 'labels', 'latestStockIn'));
     }
 }

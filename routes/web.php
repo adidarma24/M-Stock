@@ -11,7 +11,7 @@ use App\Http\Controllers\ProfileController;
 
 
 Route::get('/', function () {
-    return route('home');
+    return redirect()->route('dashboard');
 });
 
 // Route::get('/dashboard', function () {
