@@ -18,7 +18,7 @@ class ReportController extends Controller
             $query->whereBetween('created_at', [$start, $end]);
         }
 
-        $data = $query->get();
+        $data = $query->paginate(10);
         return view('dashboard.reports.stock_in', compact('data'));
     }
 
@@ -32,7 +32,7 @@ class ReportController extends Controller
             $query->whereBetween('created_at', [$start, $end]);
         }
 
-        $data = $query->get();
+        $data = $query->paginate(10);
         return view('dashboard.reports.stock_out', compact('data'));
     }
 }

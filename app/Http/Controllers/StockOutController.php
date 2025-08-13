@@ -13,7 +13,7 @@ class StockOutController extends Controller
      */
     public function index()
     {
-        $stocks = StockOut::with('product', 'user')->latest()->get();
+        $stocks = StockOut::with('product', 'user')->latest()->paginate(10);
         return view('dashboard.stock_out.index', compact('stocks'));
     }
 

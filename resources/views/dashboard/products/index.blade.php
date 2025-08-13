@@ -51,6 +51,13 @@
                     @endforelse
                 </tbody>
             </table>
+            <div class="mt-3 d-flex justify-content-center">
+                {{ $products->onEachSide(1)->links('pagination::bootstrap-5') }}
+            </div>
+            <div class="mt-2 text-muted text-center">
+                Menampilkan {{ $products->firstItem() ?? 0 }} - {{ $products->lastItem() ?? 0 }} dari total
+                {{ $products->total() }} produk
+            </div>
         </div>
     </div>
 @endsection

@@ -12,8 +12,9 @@ class StockInController extends Controller
      * Display a listing of the resource.
      */
     public function index()
+
     {
-        $stocks = StockIn::with('product', 'user')->latest()->get();
+        $stocks = StockIn::with('product', 'user')->latest()->paginate(10);
         return view('dashboard.stock_in.index', compact('stocks'));
     }
 

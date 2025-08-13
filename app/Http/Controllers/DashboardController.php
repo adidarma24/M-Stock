@@ -49,8 +49,8 @@ class DashboardController extends Controller
             return StockOut::whereBetween('created_at', [$start, $end])->sum('quantity');
         })->toArray();
 
-        // Ambil 5 stok masuk terakhir
-        $latestStockIn = StockIn::with('product')->orderByDesc('created_at')->limit(5)->get();
+        // Ambil 5 stok masuk terakhir dengan pagination
+        $latestStockIn = StockIn::with('product')->orderByDesc('created_at')->paginate(5);
 
         return view('dashboard.index', compact('stockIn', 'stockOut', 'labels', 'latestStockIn'));
     }

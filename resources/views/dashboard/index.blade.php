@@ -7,59 +7,21 @@
             <h2>Selamat Datang, {{ auth()->user()->name }}!</h2>
             <p class="text-muted">Role: <strong>{{ ucfirst(auth()->user()->role) }}</strong></p>
         </div>
-        {{-- <div class="row">
-            <div class="col-12 mb-4">
+
+        <div class="row mb-4">
+            <div class="col-md-8 mb-3">
                 <div class="card border-0 shadow rounded-3">
                     <div class="card-body">
-                        <h5 class="card-title text-center mb-3">5 Stok Masuk Terakhir</h5>
-                        <div class="table-responsive">
-                            <table class="table table-striped table-bordered">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Produk</th>
-                                        <th>Jumlah</th>
-                                        <th>Tanggal</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($latestStockIn as $item)
-                                        <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $item->product->name ?? '-' }}</td>
-                                            <td>{{ $item->quantity }}</td>
-                                            <td>{{ $item->created_at->format('d M Y H:i') }}</td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="4" class="text-center text-muted">Belum ada data stok masuk.
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
+                        <h5 class="card-title text-center">Grafik Stok Masuk & Keluar</h5>
+                        <canvas id="stockChart" height="100"></canvas>
                     </div>
                 </div>
             </div>
-        </div> --}}
-
-        <div class="col-12 mb-4">
-            <div class="row">
-                <div class="col-md-8 mb-3">
-                    <div class="card border-0 shadow rounded-3">
-                        <div class="card-body">
-                            <h5 class="card-title text-center">Grafik Stok Masuk & Keluar</h5>
-                            <canvas id="stockChart" height="100"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card border-0 shadow rounded-3">
-                        <div class="card-body">
-                            <h5 class="card-title text-center">Perbandingan Total Stok</h5>
-                            <canvas id="doughnutChart" height="100"></canvas>
-                        </div>
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 shadow rounded-3">
+                    <div class="card-body">
+                        <h5 class="card-title text-center">Perbandingan Total Stok</h5>
+                        <canvas id="doughnutChart" height="100"></canvas>
                     </div>
                 </div>
             </div>
@@ -94,11 +56,18 @@
                                 @endforelse
                             </tbody>
                         </table>
+                        <div class="mt-3 d-flex justify-content-center">
+                            {{ $latestStockIn->onEachSide(1)->links('pagination::bootstrap-5') }}
+                        </div>
+                        <div class="mt-2 text-muted text-center">
+                            Menampilkan {{ $latestStockIn->firstItem() ?? 0 }} - {{ $latestStockIn->lastItem() ?? 0 }} dari
+                            total
+                            {{ $latestStockIn->total() }} data
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     </div>
 @endsection
 
@@ -106,10 +75,10 @@
 @section('scripts')
     {{-- Chart.js CDN --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script>
+        // Bar Chart: Stock In & Out
         const ctx = document.getElementById('stockChart').getContext('2d');
-        const stockChart = new Chart(ctx, {
+        new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: @json($labels),
@@ -139,16 +108,14 @@
             }
         });
 
-        // Doughnut Chart untuk perbandingan total Stock In dan Stock Out
+        // Doughnut Chart: Total Stock In vs Out
         const doughnutCtx = document.getElementById('doughnutChart').getContext('2d');
-        const totalStockIn = @json(array_sum($stockIn));
-        const totalStockOut = @json(array_sum($stockOut));
-        const doughnutChart = new Chart(doughnutCtx, {
+        new Chart(doughnutCtx, {
             type: 'doughnut',
             data: {
                 labels: ['Total Stock In', 'Total Stock Out'],
                 datasets: [{
-                    data: [totalStockIn, totalStockOut],
+                    data: [@json(array_sum($stockIn)), @json(array_sum($stockOut))],
                     backgroundColor: [
                         'rgba(54, 162, 235, 0.7)',
                         'rgba(255, 99, 132, 0.7)'
@@ -164,7 +131,7 @@
                 responsive: true,
                 plugins: {
                     legend: {
-                        position: 'bottom',
+                        position: 'bottom'
                     }
                 }
             }
